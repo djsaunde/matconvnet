@@ -12,6 +12,12 @@ opts.eta = 0.0005 ;
 opts.mode = 'train' ;
 opts = vl_argparse(opts, varargin, 'nonrecursive') ;
 
+orig_size = size(x) ;
+x = x(:) ;
+
+size(x)
+size(v)
+
 if opts.mode == 'train'
     if nargin <= 1 || isempty(dzdy)
         y = x .* (ones(size(x)) + opts.lambda * v * x) ;
@@ -26,3 +32,6 @@ else
         y = dzdy .* (ones(size(x)) + opts.lambda * (v * x + x .* sum(v, 2))) ;
     end
 end
+
+x = reshape(x, orig_size) ;
+y = reshape(y, orig_size) ;
