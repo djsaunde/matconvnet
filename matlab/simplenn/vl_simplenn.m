@@ -337,11 +337,11 @@ for i=1:n
     
     case 'hebbian'
       if testMode
-        res(i+1).x = vl_nnhebbian(res(i).x, l.v, 'lambda', l.lambda, ...
-                                        'eta', l.eta, 'mode', 'test') ;
+        [res(i+1).x, res(i).v] = vl_nnhebbian(res(i).x, l.v, 'lambda', l.lambda, ...
+                       'eta', l.eta, 'mode', 'test', 'pass', 'forward') ;
       else
-        res(i+1).x = vl_nnhebbian(res(i).x, l.v, 'lambda', l.lambda, ...
-                                        'eta', l.eta, 'mode', 'train') ;
+        [res(i+1).x, res(i).v] = vl_nnhebbian(res(i).x, l.v, 'lambda', l.lambda, ...
+                       'eta', l.eta, 'mode', 'test', 'pass', 'forward') ;
       end
     
     case 'sigmoid'
@@ -462,6 +462,17 @@ if doder
           % if res(i).x is empty, it has been optimized away, so we use this
           % hack (which works only for ReLU):
           res(i).dzdx = vl_nnrelu(res(i+1).x, res(i+1).dzdx, leak{:}) ;
+        end
+      
+      case 'hebbian'
+        if testMode
+          [res(i).dzdx, res(i).v] = vl_nnhebbian(res(i).x, l.v, 'lambda', l.lambda, ...
+                            'eta', l.eta, 'mode', 'test', 'pass', 'backward', ...
+                            'dzdx', res(i+1).dzdx) ;
+        else
+          [res(i).dzdx, res(i).v] = vl_nnhebbian(res(i).x, l.v, 'lambda', l.lambda, ...
+                            'eta', l.eta, 'mode', 'train', 'pass', 'backward', ...
+                            'dzdx', res(i+1).dzdx) ;
         end
 
       case 'sigmoid'
