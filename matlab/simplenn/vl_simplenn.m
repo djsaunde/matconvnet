@@ -341,7 +341,7 @@ for i=1:n
                        'eta', l.eta, 'mode', 'test', 'pass', 'forward') ;
       else
         [res(i+1).x, res(i).v] = vl_nnhebbian(res(i).x, l.v, 'lambda', l.lambda, ...
-                       'eta', l.eta, 'mode', 'test', 'pass', 'forward') ;
+                       'eta', l.eta, 'mode', 'train', 'pass', 'forward') ;
       end
     
     case 'sigmoid'
