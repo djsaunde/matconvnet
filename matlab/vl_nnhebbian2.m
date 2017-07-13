@@ -29,15 +29,11 @@ end
 
 if strcmp(opts.mode, 'train')
     if strcmp(opts.pass, 'forward')
-%         y = x ;
-%         for i = 1:length(indices)
-%             idxs = indices(:, i) ;
-%             y(idxs(2), :) = y(idxs(2), :) + opts.lambda * v(i) * x(idxs(1), :) ;
-%         end
-        
         y = x ;
-        y = hebbian_forward_pass(y, x, v, indices, opts.lambda) ;
-        y = single(y) ;
+        for i = 1:length(indices)
+            idxs = indices(:, i) ;
+            y(idxs(2), :) = y(idxs(2), :) + opts.lambda * v(i) * x(idxs(1), :) ;
+        end
         
         if opts.do_plot
             subplot(5, 1, 3) ;
