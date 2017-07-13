@@ -74,8 +74,8 @@ if strcmp(opts.mode, 'train')
         end
             
         old_v = full(v) ;
-        weight_update = opts.eta * mean((reshape(x,[size(x, 1), 1, size(x, 2)]) ...
-          .* reshape(x, [1, size(x, 1), size(x, 2)])) .* double(old_v ~= 0), 3) ;
+        weight_update = bsxfun(@times, permute(x, [1 3 2]), permute(x, [3 1 2])) ;
+        weight_update = mean(weight_update, 3) ;
         v = old_v + weight_update ;
         v(v > 1) = 1 ; v(v < -1) = -1 ;
         v = sparse(double(v)) ;

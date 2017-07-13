@@ -344,6 +344,17 @@ for i=1:n
                        'eta', l.eta, 'mode', 'train', 'pass', 'forward') ;
       end
     
+    case 'hebbian2'
+      if testMode
+        [res(i+1).x, res(i).v] = vl_nnhebbian2(res(i).x, l.v, l.indices, ...
+                                'lambda', l.lambda, 'eta', l.eta, ...
+                                'mode', 'test', 'pass', 'forward') ;
+      else
+        [res(i+1).x, res(i).v] = vl_nnhebbian2(res(i).x, l.v, l.indices, ...
+                                'lambda', l.lambda, 'eta', l.eta, ...
+                                'mode', 'train', 'pass', 'forward') ;
+      end
+    
     case 'sigmoid'
       res(i+1).x = vl_nnsigmoid(res(i).x) ;
 
@@ -473,6 +484,17 @@ if doder
           [res(i).dzdx, res(i).v] = vl_nnhebbian(res(i).x, l.v, 'lambda', l.lambda, ...
                             'eta', l.eta, 'mode', 'train', 'pass', 'backward', ...
                             'dzdx', res(i+1).dzdx) ;
+        end
+      
+      case 'hebbian2'
+        if testMode
+          [res(i).dzdx, res(i).v] = vl_nnhebbian2(res(i).x, l.v, l.indices, ...
+                            'lambda', l.lambda, 'eta', l.eta, 'mode', 'test', ...
+                            'pass', 'backward', 'dzdx', res(i+1).dzdx) ;
+        else
+          [res(i).dzdx, res(i).v] = vl_nnhebbian2(res(i).x, l.v, l.indices, ...
+                            'lambda', l.lambda, 'eta', l.eta, 'mode', 'train', ...
+                            'pass', 'backward', 'dzdx', res(i+1).dzdx) ;
         end
 
       case 'sigmoid'
