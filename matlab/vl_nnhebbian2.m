@@ -1,10 +1,10 @@
 function [y, v] = vl_nnhebbian2(x, v, indices, varargin)
 
-opts.lambda = 0.1 ;
+opts.lambda = 0.001 ;
 opts.eta = 0.0005 ;
 opts.mode = 'train' ;
 opts.pass = 'forward' ;
-opts.do_plot = false ;
+opts.do_plot = true ;
 opts.dzdx = [] ;
 opts = vl_argparse(opts, varargin, 'nonrecursive') ;
 
@@ -71,11 +71,12 @@ if strcmp(opts.mode, 'train')
         for i = 1:length(indices)
             idxs = indices(:, i) ;
             update = opts.eta * mean(x(idxs(1), :) .* x(idxs(2), :), 2) ;
-            v(i) = old_v(i) + update ;
+			update(update < 0) = 0 ;
+            v(i) = old_v(i) + (((1 - old_v(i)) ^ 2) * update) ;
         end
                 
-        % truncate values in range [-1, 1]
-        v(v > 1) = 1 ; v(v < -1) = -1 ;
+        % truncate values in range [0, 1]
+        v(v > 1) = 1 ; v(v < 0) = 0 ;
             
         if opts.do_plot
             subplot(5, 1, 1) ;
