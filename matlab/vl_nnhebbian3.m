@@ -1,14 +1,15 @@
 function [y, v] = vl_nnhebbian3(x, v, indices, varargin)
 
-opts.lambda = 0.001 ;
-opts.eta = 0.00001 ;
+opts.lambda = 0.05 ;
+opts.eta = 0.0001 ;
 opts.beta = 100 * opts.eta ;
 opts.alpha = 1.0 ;
 opts.connectivity = '8-lattice' ;
 opts.mode = 'train' ;
 opts.pass = 'forward' ;
-opts.do_plot = false ;
-opts.save_updates = true ;
+opts.update = 'oja' ;
+opts.do_plot = true ;
+opts.save_updates = false ;
 opts.dzdx = [] ;
 opts = vl_argparse(opts, varargin, 'nonrecursive') ;
 
@@ -45,7 +46,44 @@ if strcmp(opts.mode, 'train')
             y(idxs(2), :) = y(idxs(2), :) + opts.lambda * v(i) * x(idxs(1), :) ;
         end
         
+        % do Hebbian weight update
+        old_v = v ;
+        for i = 1:length(indices)
+            idxs = indices(:, i) ;
+                        
+            switch opts.update
+                case 'standard'
+                    % standard Hebbian update
+                    update = opts.eta * mean(x(idxs(1, :)) .* y(idxs(2, :)), 2) ;
+                case 'oja'
+                    % Oja's learning rule
+                    update = opts.eta * mean((x(idxs(1), :) .* y(idxs(2, :)) - (y(idxs(2, :)) ^ 2 * v(i))), 2) ;
+                otherwise
+                    warning('Unexpected update type.')
+            end
+            
+            v(i) = old_v(i) + update - opts.beta ;
+        end
+        
+        v(v > 1) = 1 ; v(v < 0) = 0 ;
+                
         if opts.do_plot
+            subplot(5, 1, 1) ;
+            cla ;
+            histogram(v, linspace(-1, max(v), 50), 'FaceColor', 'm') ;
+            xlim([0, 1]) ;
+            ylim([0, numel(v(v ~= 0)) / 2]) ;
+            title('Hebbian weights') ;
+            
+            weight_update = v - old_v ;
+
+            subplot(5, 1, 2) ;
+            cla ;
+            histogram(weight_update(weight_update ~= 0), linspace(-1, 1, 150), 'FaceColor', 'k') ;
+            xlim([-1, 1]) ;
+            ylim([0, numel(v) / 2]) ;
+            title('Hebbian weight update') ;
+            
             subplot(5, 1, 3) ;
             cla ;
             histogram(x(x ~= 0), linspace(-100, 100, 150), 'FaceColor', 'c') ;
@@ -85,17 +123,6 @@ if strcmp(opts.mode, 'train')
                 (dvdz(idxs(2), :) .* (opts.lambda * x(idxs(1), :))) ;
         end
         
-        % do Hebbian weight update
-        old_v = v ;
-        for i = 1:length(indices)
-            idxs = indices(:, i) ;
-            update = opts.eta * sum(x(idxs(1), :) .* x(idxs(2), :), 2) ;
-            v(i) = old_v(i) + update - opts.beta ;
-            % potentially include exp(-old_v(i)) term
-        end
-        
-        weight_update = v - old_v ;
-        
         diff = dvdz - y ;
         grad_update = [] ;
         for i = 1:length(indices)
@@ -115,30 +142,6 @@ if strcmp(opts.mode, 'train')
             
             save(fullfile(update_path, ['gradients_' num2str(weight_counter)]), 'grad_update') ;
             save(fullfile(update_path, ['hebbian_' num2str(weight_counter)]), 'weight_update') ;
-        end
-        
-        % threshold values to [0, \infty)
-        v(v < 0) = 0 ;
-                
-        if opts.do_plot
-            subplot(5, 1, 1) ;
-            cla ;
-            histogram(v, linspace(-1, max(v), 50), 'FaceColor', 'm') ;
-            xlim([-1, max(v)]) ;
-            ylim([0, numel(v(v ~= 0)) / 2]) ;
-            title('Hebbian weights') ;
-            
-            weight_update = v - old_v ;
-
-            subplot(5, 1, 2) ;
-            cla ;
-            histogram(weight_update(weight_update ~= 0), linspace(-1, 1, 150), 'FaceColor', 'k') ;
-            xlim([-1, 1]) ;
-            ylim([0, numel(v) / 2]) ;
-            title('Hebbian weight update') ;
-
-            pause(0.01) ;
-            hold on ;
         end
     end
 else
