@@ -70,9 +70,9 @@ if strcmp(opts.mode, 'train')
         if opts.do_plot
             subplot(5, 1, 1) ;
             cla ;
-            histogram(v, linspace(-1, max(v), 50), 'FaceColor', 'm') ;
+            histogram(old_v, linspace(-1, max(old_v), 50), 'FaceColor', 'm') ;
             xlim([0, 1]) ;
-            ylim([0, numel(v(v ~= 0)) / 2]) ;
+            ylim([0, numel(old_v(old_v ~= 0)) / 2]) ;
             title('Hebbian weights') ;
             
             weight_update = v - old_v ;
