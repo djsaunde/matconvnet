@@ -79,7 +79,7 @@ if strcmp(opts.mode, 'train')
                 mkdir(weight_path)
             end
             
-            save(fullfile(weight_path, ['weights_' num2str(weight_counter)]), 'grad_update') ;
+            save(fullfile(weight_path, ['weights_' num2str(weight_counter)]), 'v') ;
         end
                 
         if opts.do_plot
