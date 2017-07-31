@@ -10,6 +10,7 @@ opts.pass = 'forward' ;
 opts.update = 'oja' ;
 opts.do_plot = true ;
 opts.save_updates = false ;
+opts.save_weights = true ;
 opts.dzdx = [] ;
 opts = vl_argparse(opts, varargin, 'nonrecursive') ;
 
@@ -23,6 +24,7 @@ netname = ['cifar_hebbian_' num2str(opts.lambda) '_' num2str(opts.eta) ...
                                         '_' opts.connectivity] ;
 
 update_path = fullfile('..', 'work', 'updates', netname) ;
+weight_path = fullfile('..', 'work', 'weights', netname) ;
             
 if strcmp(opts.pass, 'backward')
   dzdy = opts.dzdx ;
@@ -66,6 +68,19 @@ if strcmp(opts.mode, 'train')
         end
         
         v(v > 1) = 1 ; v(v < 0) = 0 ;
+        
+        if opts.save_weights
+            if weight_counter == 1
+                if exist(weight_path, 'dir') == 7   
+                    delete(fullfile(weight_path, '*'))
+                    rmdir(weight_path)
+                end
+                
+                mkdir(weight_path)
+            end
+            
+            save(fullfile(weight_path, ['weights_' num2str(weight_counter)]), 'grad_update') ;
+        end
                 
         if opts.do_plot
             subplot(5, 1, 1) ;
